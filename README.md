@@ -8,7 +8,7 @@ Karen Cochrane and David Han
 Edited by Angela Lin (a232lin/21084451)
 
 Description
-Exploreing sprite sheets and animations.
+Exploring sprite sheets and animations.
 
 Assets
 
