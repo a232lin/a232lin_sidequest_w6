@@ -17,7 +17,6 @@
     R = platformRC.png       (platform right cap) -> boars turn
     [ = wallL.png            (wall left side)     -> boars turn
     ] = wallR.png            (wall right side)    -> boars turn
-    b = boar spawn
     x = leaf collectible (boars pass through)
     f = fire hazard (player takes damage, boars turn around if they "see" it ahead)
       = empty (no sprite)
@@ -58,7 +57,12 @@ const KNOCK_FRAMES = 30;
 let won = false;
 
 let ground, groundDeep, platformsL, platformsR, wallsL, wallsR;
-let groundTileImg, groundTileDeepImg, platformLCImg, platformRCImg, wallLImg, wallRImg;
+let groundTileImg,
+  groundTileDeepImg,
+  platformLCImg,
+  platformRCImg,
+  wallLImg,
+  wallRImg;
 
 let bgLayers = [];
 let bgForeImg, bgMidImg, bgFarImg;
@@ -94,21 +98,20 @@ let deathFrameTimer = 0;
     R = platformRC.png       (platform right cap) -> boars turn
     [ = wallL.png            (wall left side)     -> boars turn
     ] = wallR.png            (wall right side)    -> boars turn
-    b = boar spawn
     x = leaf collectible (boars pass through)
     f = fire hazard (player takes damage, boars turn around if they "see" it ahead)
       = empty (no sprite)
 */
 let level = [
-  "                    g   g   b  x        ", // row  0
-  "                b x         LggR        ", // row  1
+  "                    g   g      x        ", // row  0
+  "                  x         LggR        ", // row  1
   "      x   f     LggR                    ", // row  2
   "     LR   LgR          LR               ", // row  3
-  "   fx  b        x   b                   ", // row  4
-  "   LgggR   x   LR   LgR x   b  xf       ", // row  5
-  "         LgR  b x       g   LggggR      ", // row  6
+  "   fx           x                       ", // row  4
+  "   LgggR   x   LR   LgR x      xf       ", // row  5
+  "         LgR    x       g   LggggR      ", // row  6
   " fx           LgR                    fx ", // row  7
-  " LgR      b                         LggR", // row  8
+  " LgR                                LggR", // row  8
   "         LgR        f x    LR  LgR  [dd]", // row  9
   "   x     [d]      x LggR   x    ff  [dd]", // row 10
   "LgggRffLggggggRfffLgggg]fffgfLgggggggggg", // row 11
@@ -143,26 +146,6 @@ const PLAYER_JUMP = 4.5;
 const ATTACK_RANGE_X = 20;
 const ATTACK_RANGE_Y = 16;
 
-// boar tuning
-const BOAR_W = 18;
-const BOAR_H = 12;
-const BOAR_SPEED = 0.6;
-const BOAR_HP = 3;
-
-const BOAR_KNOCK_FRAMES = 7;
-const BOAR_KNOCK_X = 1.2;
-const BOAR_KNOCK_Y = 1.6;
-const BOAR_FLASH_FRAMES = 5;
-
-// boar turning tuning
-const BOAR_TURN_COOLDOWN = 12; // frames
-
-// boar probe positioning (relative to boar)
-const PROBE_FORWARD = 10; // how far ahead (smaller = closer to boar)
-const PROBE_FRONT_Y = 10; // how far down from boar center to sample "ahead at feet"
-const PROBE_HEAD_Y = 0; // how far UP from boar center to sample "ahead above"
-const PROBE_SIZE = 4; // for debugging purposes
-
 // HUD constants
 const FONT_COLS = 19;
 const FONT_ROWS = 5;
@@ -173,7 +156,9 @@ const GLYPH_W = CELL * FONT_SCALE;
 const GLYPH_H = CELL * FONT_SCALE;
 
 const FONT_CHARS =
-  " !\"#$%&'()*+,-./0123456789:;<=>?@" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`" + "abcdefghijklmnopqrstuvwxyz{|}~";
+  " !\"#$%&'()*+,-./0123456789:;<=>?@" +
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`" +
+  "abcdefghijklmnopqrstuvwxyz{|}~";
 
 // gravity
 const GRAVITY = 10;
@@ -257,7 +242,11 @@ function draw() {
   camera.height = VIEWH;
 
   let targetX = constrain(player.x, VIEWW / 2, LEVELW - VIEWW / 2 - TILE_W / 2);
-  let targetY = constrain(player.y, VIEWH / 2 - TILE_H * 2, LEVELH - VIEWH / 2 - TILE_H);
+  let targetY = constrain(
+    player.y,
+    VIEWH / 2 - TILE_H * 2,
+    LEVELH - VIEWH / 2 - TILE_H,
+  );
 
   camera.x = Math.round(lerp(camera.x || targetX, targetX, 0.1));
   camera.y = Math.round(lerp(camera.y || targetY, targetY, 0.1));
@@ -267,7 +256,15 @@ function draw() {
 
   // --- PLAYER INPUT (disabled during knockback / death) ---
   // ATTACK
-  if (!dead && !won && knockTimer === 0 && !pendingDeath && grounded && !attacking && kb.presses("space")) {
+  if (
+    !dead &&
+    !won &&
+    knockTimer === 0 &&
+    !pendingDeath &&
+    grounded &&
+    !attacking &&
+    kb.presses("space")
+  ) {
     attacking = true;
     attackHitThisSwing = false;
     attackFrameCounter = 0;
@@ -278,7 +275,14 @@ function draw() {
   }
 
   // JUMP
-  if (!dead && !won && knockTimer === 0 && !pendingDeath && grounded && kb.presses("up")) {
+  if (
+    !dead &&
+    !won &&
+    knockTimer === 0 &&
+    !pendingDeath &&
+    grounded &&
+    kb.presses("up")
+  ) {
     player.vel.y = -1 * PLAYER_JUMP;
   }
 
@@ -292,7 +296,11 @@ function draw() {
   } else if (!dead && attacking) {
     attackFrameCounter++;
 
-    if (!attackHitThisSwing && attackFrameCounter >= 4 && attackFrameCounter <= 8) {
+    if (
+      !attackHitThisSwing &&
+      attackFrameCounter >= 4 &&
+      attackFrameCounter <= 8
+    ) {
       tryHitBoar();
     }
 
@@ -416,7 +424,11 @@ function draw() {
   sensor.y = sy;
 
   // --- HUD ---
-  if (score !== lastScore || health !== lastHealth || maxHealth !== lastMaxHealth) {
+  if (
+    score !== lastScore ||
+    health !== lastHealth ||
+    maxHealth !== lastMaxHealth
+  ) {
     redrawHUD();
     lastScore = score;
     lastHealth = health;
@@ -439,7 +451,10 @@ function draw() {
 
 function applyIntegerScale() {
   const c = document.querySelector("canvas");
-  const scale = Math.max(1, Math.floor(Math.min(window.innerWidth / VIEWW, window.innerHeight / VIEWH)));
+  const scale = Math.max(
+    1,
+    Math.floor(Math.min(window.innerWidth / VIEWW, window.innerHeight / VIEWH)),
+  );
   c.style.width = VIEWW * scale + "px";
   c.style.height = VIEWH * scale + "px";
 }
@@ -462,7 +477,17 @@ function drawBitmapTextToGfx(g, str, x, y, scale = FONT_SCALE) {
     const sx = col * CELL;
     const sy = row * CELL;
 
-    g.image(fontImg, Math.round(x + i * dw), Math.round(y), dw, dh, sx, sy, CELL, CELL);
+    g.image(
+      fontImg,
+      Math.round(x + i * dw),
+      Math.round(y),
+      dw,
+      dh,
+      sx,
+      sy,
+      CELL,
+      CELL,
+    );
   }
 }
 
@@ -564,7 +589,10 @@ function playerHitByBoar(player, e) {
 
 // --- PLAYER ATTACK -> BOAR ---
 function tryHitBoar() {
-  const grounded = sensor.overlapping(ground) || sensor.overlapping(platformsL) || sensor.overlapping(platformsR);
+  const grounded =
+    sensor.overlapping(ground) ||
+    sensor.overlapping(platformsL) ||
+    sensor.overlapping(platformsR);
   if (!grounded) return;
 
   const facingDir = player.mirror.x ? -1 : 1;
@@ -775,7 +803,12 @@ function updateGroundProbe(e) {
 
 function frontProbeHasGroundAhead(e) {
   const p = e.frontProbe;
-  return p.overlapping(ground) || p.overlapping(groundDeep) || p.overlapping(platformsL) || p.overlapping(platformsR);
+  return (
+    p.overlapping(ground) ||
+    p.overlapping(groundDeep) ||
+    p.overlapping(platformsL) ||
+    p.overlapping(platformsR)
+  );
 }
 
 function frontProbeHitsWall(e) {
@@ -792,7 +825,12 @@ function shouldTurnNow(e, dangerNow) {
 
 function boarGrounded(e) {
   const p = e.groundProbe;
-  return p.overlapping(ground) || p.overlapping(groundDeep) || p.overlapping(platformsL) || p.overlapping(platformsR);
+  return (
+    p.overlapping(ground) ||
+    p.overlapping(groundDeep) ||
+    p.overlapping(platformsL) ||
+    p.overlapping(platformsR)
+  );
 }
 
 // --- BOAR AI (simple + reliable) ---
@@ -925,7 +963,12 @@ function updateBoars() {
     // 3) extra: turn if the "above" probe sees fire (early warning)
     const headSeesFire = e.footProbe.overlapping(fire);
 
-    const dangerNow = noGroundAhead || frontHitsLeaf || frontHitsFire || frontHitsWall || headSeesFire;
+    const dangerNow =
+      noGroundAhead ||
+      frontHitsLeaf ||
+      frontHitsFire ||
+      frontHitsWall ||
+      headSeesFire;
 
     if (e.turnTimer === 0 && shouldTurnNow(e, dangerNow)) {
       turnBoar(e, -e.dir); // already nudges + vel.x=0
