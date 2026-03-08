@@ -194,6 +194,9 @@ export class Game {
       this._unsubs.push(
         this.events.on("boar:damaged", () => this.sound.play("hitEnemy")),
       );
+      this._unsubs.push(
+        this.events.on("player:jumped", () => this.sound.play("jump")),
+      );
     }
 
     if (this.debug) {
