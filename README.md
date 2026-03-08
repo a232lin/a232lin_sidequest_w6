@@ -12,5 +12,7 @@ Exploring sprite sheets and animations.
 
 Assets
 
+References
+
 GenAI
 The code was written by Dr. Karen Cochrane and David Han but they used GenAI to write the comments.
