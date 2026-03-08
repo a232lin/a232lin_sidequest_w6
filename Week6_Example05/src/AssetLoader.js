@@ -148,9 +148,9 @@ function defaultPlayerAnis() {
 
 function defaultBoarAnis() {
   return {
-    run: { row: 1, frames: 4, frameDelay: 3 },
-    throwPose: { row: 4, frames: 1, frameDelay: Infinity, frame: 0 },
-    death: { row: 5, frames: 4, frameDelay: 16 },
+    run: { row: 1, frames: 6, frameDelay: 3 },
+    throwPose: { row: 3, frames: 6, frameDelay: Infinity, frame: 0 },
+    death: { row: 7, frames: 4, frameDelay: 16 },
   };
 }
 
