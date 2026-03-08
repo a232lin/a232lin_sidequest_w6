@@ -134,7 +134,8 @@ async function boot() {
   soundManager = new SoundManager();
   soundManager.load("music", "./assets/sfx/music.wav");
   soundManager.load("hitEnemy", "./assets/sfx/hitEnemy.wav");
-  soundManager.load("hitEnemy", "./assets/sfx/receiveDamage.wav");
+  soundManager.load("receiveDamage", "./assets/sfx/receiveDamage.wav");
+  soundManager.load("leafCollect", "./assets/sfx/leafCollect.wav");
 
   // --- Parallax layer defs (VIEW) ---
   const defs = levelPkg.level?.view?.parallax ?? [];
