@@ -37,7 +37,10 @@ import { LevelLoader } from "./src/LevelLoader.js";
 import { Game } from "./src/Game.js";
 import { ParallaxBackground } from "./src/ParallaxBackground.js";
 import { loadAssets } from "./src/AssetLoader.js";
-import { applyIntegerScale, installResizeHandler } from "./src/utils/IntegerScale.js";
+import {
+  applyIntegerScale,
+  installResizeHandler,
+} from "./src/utils/IntegerScale.js";
 
 import { CameraController } from "./src/CameraController.js";
 import { InputManager } from "./src/InputManager.js";
@@ -129,6 +132,7 @@ async function boot() {
   // --- Audio registry ---
   // (AudioContext may still be locked until the user clicks/presses a key.)
   soundManager = new SoundManager();
+  soundManager.load("music", "./assets/sfx/music.wav");
 
   // --- Parallax layer defs (VIEW) ---
   const defs = levelPkg.level?.view?.parallax ?? [];
@@ -298,10 +302,14 @@ function draw() {
 
 function mousePressed() {
   unlockAudioOnce();
+  // play music after first click if not already playing
+  soundManager.play("music", true); // 'true' for loop
 }
 
 function keyPressed(evt) {
   unlockAudioOnce();
+  // play music after first key press if not already playing
+  soundManager.play("music", true);
   return preventKeysThatScroll(evt);
 }
 

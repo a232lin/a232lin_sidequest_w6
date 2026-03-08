@@ -24,7 +24,11 @@ export class SoundManager {
     this.sfx[name] = loadSound(path);
   }
 
-  play(name) {
-    this.sfx[name]?.play();
+  play(name, loop = false) {
+    const sound = this.sfx[name];
+    if (sound) {
+      sound.setLoop(loop); // <-- set loop
+      sound.play();
+    }
   }
 }
