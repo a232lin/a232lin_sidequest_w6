@@ -133,6 +133,8 @@ async function boot() {
   // (AudioContext may still be locked until the user clicks/presses a key.)
   soundManager = new SoundManager();
   soundManager.load("music", "./assets/sfx/music.wav");
+  soundManager.load("hitEnemy", "./assets/sfx/hitEnemy.wav");
+  soundManager.load("hitEnemy", "./assets/sfx/receiveDamage.wav");
 
   // --- Parallax layer defs (VIEW) ---
   const defs = levelPkg.level?.view?.parallax ?? [];
